@@ -50,6 +50,7 @@ UserRouter.post("/signup", async (req, res) => {
     password: hashedPassword,
     gender,
     role,
+    profilePicture
   });
   await newUser.save();
 
