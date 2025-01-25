@@ -26,7 +26,7 @@ UserRouter.get("/allUser", async (req, res) => {
 });
 
 UserRouter.post("/signup", async (req, res) => {
-  const { userName, email, password, gender, role } = req.body;
+  const { userName, email, password, gender, role , profilePicture } = req.body;
   if (!userName || !email || !password) {
     return res
       .status(400)
@@ -90,14 +90,12 @@ UserRouter.post("/login", async (req, res) => {
 
     const token = generateToken(checkingUser);
 
-    res
-      .status(201)
-      .json({
-        error: false,
-        token,
-        checkingUser,
-        message: "User successfully logged in",
-      });
+    res.status(201).json({
+      error: false,
+      token,
+      checkingUser,
+      message: "User successfully logged in",
+    });
   } catch (error) {
     console.log(error);
     return res
