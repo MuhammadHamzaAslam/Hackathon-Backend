@@ -1,6 +1,10 @@
 import express from "express";
 import { UserModal } from "../models/userModal.js";
-import { comparePassword, hashPassword } from "../lib/helperFunction.js";
+import {
+  comparePassword,
+  generateToken,
+  hashPassword,
+} from "../lib/helperFunction.js";
 
 const UserRouter = express.Router();
 
@@ -22,7 +26,7 @@ UserRouter.get("/allUser", async (req, res) => {
 });
 
 UserRouter.post("/signup", async (req, res) => {
-  const { userName, email, password, gender } = req.body;
+  const { userName, email, password, gender, role } = req.body;
   if (!userName || !email || !password) {
     return res
       .status(400)
@@ -45,12 +49,16 @@ UserRouter.post("/signup", async (req, res) => {
     email,
     password: hashedPassword,
     gender,
+    role,
   });
   await newUser.save();
+
+  const token = generateToken(newUser);
 
   res.status(201).json({
     error: false,
     message: "User Added Successfully",
+    token,
     user: newUser,
   });
 });
@@ -80,9 +88,16 @@ UserRouter.post("/login", async (req, res) => {
         .json({ error: true, message: "Invalid credentials" });
     }
 
+    const token = generateToken(checkingUser);
+
     res
       .status(201)
-      .json({ error: false, message: "User successfully logged in" });
+      .json({
+        error: false,
+        token,
+        checkingUser,
+        message: "User successfully logged in",
+      });
   } catch (error) {
     console.log(error);
     return res
