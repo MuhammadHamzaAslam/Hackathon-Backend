@@ -35,10 +35,10 @@ export async function addCategory(req, res) {
 export async function editCategory(req, res) {
   try {
     const { id } = req.params; // Category ID
-    const { name, subcategories } = req.body;
+    const { name, subcategories , maxLoan} = req.body;
 
     // Validate request
-    if (!name && !subcategories) {
+    if (!name && !subcategories && !maxLoan) {
       return res.status(400).json({
         error: true,
         message: "At least one of 'name' or 'subcategories' must be provided",
@@ -48,7 +48,7 @@ export async function editCategory(req, res) {
     // Find and update category
     const updatedCategory = await CategoryModal.findByIdAndUpdate(
       id,
-      { ...(name && { name }), ...(subcategories && { subcategories }) },
+      { ...(name && { name }), ...(subcategories && { subcategories }) , ...(maxLoan && { maxLoan }) },
       { new: true } // Return the updated document
     );
 
