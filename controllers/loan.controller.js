@@ -270,3 +270,44 @@ export async function updateLoanRequest(req, res) {
         });
     }
 }
+
+
+
+
+
+
+
+
+
+
+export async function getAllRequest(req,res){
+    try{
+        let finding = await LoanModal.find()
+        res.send({
+            error: false,
+            message: "All Request Fetched Successfully",
+            data: finding
+        })
+    }catch(e){
+        res.send({
+            error: true,
+            message: e.message
+        })
+    }
+}
+
+export async function getCurrentUserRequest(req,res){
+    try{
+        let finding = await LoanModal.find({userId: req.params.userID})
+        res.send({
+            error: false,
+            message: "Fetched Successfully",
+            data: finding
+        })
+    }catch(e){
+        res.send({
+            error: true,
+            message: e.message
+        })
+    }
+}

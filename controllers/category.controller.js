@@ -2,7 +2,7 @@ import CategoryModal from "../models/category.model.js";
 
 export async function addCategory(req, res) {
   try {
-    const { name, subcategories } = req.body;
+    const { name, subcategories , maxLoan } = req.body;
 
     // Validate request
     if (!name) {
@@ -12,7 +12,8 @@ export async function addCategory(req, res) {
     // Create new category
     const newCategory = CategoryModal({
       name,
-      subcategories: subcategories || [], // Default to an empty array if no subcategories are provided
+      subcategories: subcategories || [], 
+      maxLoan
     });
 
     await newCategory.save();
