@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import UserRouter from "./routes/user.js";
 import { connectDB } from "./lib/connectDB.js";
+import categoryRouter from "./routes/category.js";
+import loanRouter from "./routes/loans.js";
 
 const app = express();
 const PORT = 4000;
@@ -23,6 +25,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/user", UserRouter);
+app.use("/api/category", categoryRouter);
+app.use("/api/loans", loanRouter);
 
 app.listen(PORT, () => {
   console.log("Server is running on 4000");
