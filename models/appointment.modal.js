@@ -2,11 +2,7 @@ import mongoose from "mongoose";
 
 const appointmentSchema = new mongoose.Schema(
   {
-    loanId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Loan",
-      required: true,
-    },
+    loanId: { type: mongoose.Schema.Types.ObjectId, ref: "Loan", required: true },
     tokenNumber: { type: String, required: true, unique: true },
     date: { type: Date, required: true },
     time: { type: String, required: true },
@@ -15,6 +11,6 @@ const appointmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-let AppointmentModal = mongoose.model("appointment", appointmentSchema);
+let AppointmentModal = mongoose.model("appointment" , appointmentSchema)
 
-export default AppointmentModal;
+export default AppointmentModal

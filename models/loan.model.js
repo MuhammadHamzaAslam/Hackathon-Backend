@@ -1,12 +1,9 @@
 import mongoose from "mongoose";
 
+
 const loanSchema = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "user",
-      required: true,
-    },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true },
     category: { type: String, required: true, ref: "category" },
     subcategory: { type: String, required: true },
     initialDeposit: { type: Number, required: true },
@@ -26,16 +23,11 @@ const loanSchema = new mongoose.Schema(
         location: { type: String },
       },
     ],
-    status: {
-      type: String,
-      enum: ["Pending", "Approved", "Rejected"],
-      default: "Pending",
-    },
+    status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
   },
   { timestamps: true }
 );
 
-let LoanModal =
-  mongoose.models.loanRequest || mongoose.model("loanRequest", loanSchema);
+let LoanModal = mongoose.model("loanRequest", loanSchema);
 
-export default LoanModal;
+export default LoanModal
