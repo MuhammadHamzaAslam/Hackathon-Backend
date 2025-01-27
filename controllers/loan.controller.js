@@ -51,6 +51,7 @@ export async function submitLoanForm(req, res) {
         });
 
         // If user doesn't exist, create a new user
+        console.log(isUserRegistered , "user regiestered")
         if (!isUserRegistered) {
             // Generate a random password for the new user
             let password = generateRandomPassword(12);
@@ -69,11 +70,14 @@ export async function submitLoanForm(req, res) {
                 address,
             };
 
+            
             // Create the new user and save to the database
             const newUser = new UserModal(userObj);
             await newUser.save();
 
             // Send a password reset email to the user
+            console.log("reset password email");
+            
             await sendResetPasswordEmail(email, password);
 
             // Get the userId of the newly created user
