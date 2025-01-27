@@ -116,7 +116,7 @@ export async function LoginNewUser(req, res) {
         console.log(user, "user");
 
         let generatingToken = await jwt.sign(
-            { id: user._id, email: user.email , role: user.role}, 
+            { id: user._id, email: user.email , role: user.role , cnic: user.cnic , isPasswordReset: user.isResetPassword }, 
             process.env.JWT_PASSWORD_SECRET_KEY,
             { expiresIn: '60d' }
         );

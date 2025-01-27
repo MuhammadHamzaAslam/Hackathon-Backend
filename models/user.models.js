@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ["user", "admin"], default: "user" },
     city: { type: String },
     country: { type: String },
+    isResetPassword: {type: Boolean , default: false}
   },
   { timestamps: true }
 );
