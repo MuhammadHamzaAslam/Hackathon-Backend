@@ -49,7 +49,7 @@ export async function editCategory(req, res) {
     const updatedCategory = await CategoryModal.findByIdAndUpdate(
       id,
       { ...(name && { name }), ...(subcategories && { subcategories }) },
-      { new: true } // Return the updated document
+      { new: true }
     );
 
     if (!updatedCategory) {
