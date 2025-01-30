@@ -141,11 +141,16 @@ export async function LoginNewUser(req, res) {
     res.send({
       message: "Good",
       token: generatingToken,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (e) {
     console.error(e);
     res.send({
-      message: "error",
+      message: e.message || "error",
     });
   }
 }
@@ -175,9 +180,9 @@ export async function ResetPassword(req, res) {
       { expiresIn: "60d" }
     );
 
-    user.password = hashedPassword
-    user.isResetPassword = true
-    await user.save()
+    user.password = hashedPassword;
+    user.isResetPassword = true;
+    await user.save();
     res.send({
       message: "Good",
       token: generatingToken,

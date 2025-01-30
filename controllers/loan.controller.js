@@ -128,33 +128,37 @@ export async function submitLoanForm(req, res) {
   }
 }
 
-// export async function upadateLoanRequest(req, res) {
-//     try {
-//         let findRequest = LoanModal.findById(req.body.requestId)
+export async function getAllRequest(req, res) {
+  try {
+    let finding = await LoanModal.find();
+    res.send({
+      error: false,
+      message: "All Request Fetched Successfully",
+      data: finding,
+    });
+  } catch (e) {
+    res.send({
+      error: true,
+      message: e.message,
+    });
+  }
+}
 
-//         if (!findRequest) {
-//             res.send({
-//                 error: true,
-//                 message: "No Request Found There is an error"
-//             })
-//         }
-
-//         if (findRequest.status === "Approved") {
-
-//         } else if (findRequest.status === "Rejected") {
-//             if (!req.body.rejectedReason) {
-//                 return res.send({
-//                     error: true,
-//                     message: "Please Write The Rejected Reason"
-//                 })
-//             }
-//             findRequest.status = "Rejected"
-//             await sendRejectEmail(req.body.email, req.body.rejectedReason)
-//         }
-//     } catch (e) {
-
-//     }
-// }
+export async function getCurrentUserRequest(req, res) {
+  try {
+    let finding = await LoanModal.find({ userId: req.params.userID });
+    res.send({
+      error: false,
+      message: "Fetched Successfully",
+      data: finding,
+    });
+  } catch (e) {
+    res.send({
+      error: true,
+      message: e.message,
+    });
+  }
+}
 
 export async function updateLoanRequest(req, res) {
   try {
@@ -285,38 +289,6 @@ export async function updateLoanRequest(req, res) {
   } catch (e) {
     console.error("Error in updateLoanRequest:", e.message);
     res.status(500).send({
-      error: true,
-      message: e.message,
-    });
-  }
-}
-
-export async function getAllRequest(req, res) {
-  try {
-    let finding = await LoanModal.find();
-    res.send({
-      error: false,
-      message: "All Request Fetched Successfully",
-      data: finding,
-    });
-  } catch (e) {
-    res.send({
-      error: true,
-      message: e.message,
-    });
-  }
-}
-
-export async function getCurrentUserRequest(req, res) {
-  try {
-    let finding = await LoanModal.find({ userId: req.params.userID });
-    res.send({
-      error: false,
-      message: "Fetched Successfully",
-      data: finding,
-    });
-  } catch (e) {
-    res.send({
       error: true,
       message: e.message,
     });
