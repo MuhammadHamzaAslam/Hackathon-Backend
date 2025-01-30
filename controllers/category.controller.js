@@ -2,7 +2,7 @@ import CategoryModal from "../models/category.model.js";
 
 export async function addCategory(req, res) {
   try {
-    const { name, subcategories , maxLoan } = req.body;
+    const { name, subcategories } = req.body;
 
     // Validate request
     if (!name) {
@@ -12,8 +12,7 @@ export async function addCategory(req, res) {
     // Create new category
     const newCategory = CategoryModal({
       name,
-      subcategories: subcategories || [], 
-      maxLoan
+      subcategories: subcategories || [], // Default to an empty array if no subcategories are provided
     });
 
     await newCategory.save();
@@ -49,7 +48,7 @@ export async function editCategory(req, res) {
     const updatedCategory = await CategoryModal.findByIdAndUpdate(
       id,
       { ...(name && { name }), ...(subcategories && { subcategories }) },
-      { new: true }
+      { new: true } // Return the updated document
     );
 
     if (!updatedCategory) {

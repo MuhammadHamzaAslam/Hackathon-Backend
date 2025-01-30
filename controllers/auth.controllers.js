@@ -141,7 +141,6 @@ export async function LoginNewUser(req, res) {
     res.send({
       message: "Good",
       token: generatingToken,
-      user : user
     });
   } catch (e) {
     console.error(e);
