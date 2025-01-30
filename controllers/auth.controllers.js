@@ -10,6 +10,8 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
 dotenv.config();
+console.log("JWT SECRET KEY" , process.env.JWT_PASSWORD_SECRET_KEY);
+
 
 export async function SignUpNewUser(req, res) {
   try {
