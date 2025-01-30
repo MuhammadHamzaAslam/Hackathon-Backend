@@ -174,6 +174,17 @@ export async function updateLoanStatus(req, res) {
       });
     }
 
+    // Validate the status value
+    const allowedStatuses = ["Pending", "Approved", "Rejected"];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        error: true,
+        message: `Invalid status. Allowed values are: ${allowedStatuses.join(
+          ", "
+        )}.`,
+      });
+    }
+
     // Check if the loan exists
     const loan = await LoanModal.findById(loanID);
     if (!loan) {
