@@ -1,5 +1,5 @@
 import {
-  comaprePassword,
+  comparePassword,
   convertPasswordToHash,
   generateRandomPassword,
   generateToken,
@@ -7,6 +7,9 @@ import {
 } from "../lib/utility.js";
 import UserModal from "../models/user.models.js";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export async function SignUpNewUser(req, res) {
   try {
@@ -163,24 +166,26 @@ export async function LoginNewUser(req, res) {
       return res.status(400).json({
         error: true,
         message: "User Not Found!",
+        user: null,
       });
     }
 
-    let isPasswordCorrect = await comaprePassword(
+    let isPasswordCorrect = await comparePassword(
       req.body.password,
       user.password
     );
     if (!isPasswordCorrect) {
-      res.status(400).json({
+      return res.status(400).json({
         error: true,
         message: "Password Not Matched!",
+        user: null,
       });
     }
 
     console.log(isPasswordCorrect);
     console.log(user, "user");
 
-    let generatingToken = await jwt.sign(
+    let generatingToken = jwt.sign(
       {
         id: user._id,
         email: user.email,
@@ -201,9 +206,10 @@ export async function LoginNewUser(req, res) {
     });
   } catch (e) {
     console.error(e);
-    res.status(404).json({
+    res.status(500).json({
       error: true,
       message: e.message,
+      user: null,
     });
   }
 }
