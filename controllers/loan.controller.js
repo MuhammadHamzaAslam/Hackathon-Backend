@@ -3,6 +3,7 @@ import {
   convertPasswordToHash,
   generateRandomPassword,
   generateTokenSlip,
+  sendApprovalEmail,
   sendRejectEmail,
   sendResetPasswordEmail,
 } from "../lib/utility.js";
@@ -160,137 +161,199 @@ export async function getCurrentUserRequest(req, res) {
   }
 }
 
-export async function updateLoanRequest(req, res) {
+export async function updateLoanStatus(req, res) {
   try {
-    const { requestId, email, rejectedReason, appointmentDetails, status } =
-      req.body;
+    const { loanID } = req.params;
+    const { status, reason } = req.body;
 
-    // Find the loan request by its ID
-    let findRequest = await LoanModal.findById(requestId);
-
-    if (!findRequest) {
-      return res.status(404).send({
+    // Validate required fields
+    if (!loanID || !status) {
+      return res.status(400).json({
         error: true,
-        message: "No request found, there is an error.",
+        message: "Loan ID and status are required.",
       });
     }
 
-    // Handle loan request status update to "Approved"
+    // Check if the loan exists
+    const loan = await LoanModal.findById(loanID);
+    if (!loan) {
+      return res.status(404).json({
+        error: true,
+        message: "Loan not found.",
+      });
+    }
+
+    // Update the loan status
+    loan.status = status;
+    await loan.save();
+
+    // Fetch the user associated with the loan
+    const user = await UserModal.findById(loan.userId);
+    if (!user) {
+      return res.status(404).json({
+        error: true,
+        message: "User not found.",
+      });
+    }
+
+    // Send email based on the status
     if (status === "Approved") {
-      // If it's already approved, return an error
-      // if (findRequest.status === "Approved") {
-      //     return res.status(400).send({
-      //         error: true,
-      //         message: "This loan request is already approved.",
-      //     });
-      // }
-
-      // Update loan status to approved
-      findRequest.status = "Approved";
-      await findRequest.save();
-
-      // Generate a unique token for the user
-      const tokenNumber = `TOKEN-${findRequest._id.toString()}`; // Generate token from loan request ID
-
-      // Schedule the appointment
-      const appointment = new AppointmentModal({
-        loanId: requestId,
-        userId: findRequest.userId,
-        tokenNumber,
-        date: appointmentDetails.date,
-        time: appointmentDetails.time,
-        officeLocation: appointmentDetails.officeLocation,
-      });
-
-      await appointment.save();
-
-      // Generate token slip (JPEG image)
-      const tokenSlipImage = await generateTokenSlip(
-        tokenNumber,
-        appointmentDetails
+      await sendApprovalEmail(
+        user.email,
+        "Your loan application has been approved."
       );
-
-      // Send an email with the token slip to the user
-      await sendEmail(
-        email,
-        "Loan Request Approved",
-        "Your loan request has been approved. Please find your token slip attached.",
-        [
-          {
-            filename: `Token_${tokenNumber}.jpeg`,
-            path: tokenSlipImage,
-            encoding: "base64",
-          },
-        ]
+    } else if (status === "Rejected") {
+      await sendRejectEmail(
+        user.email,
+        reason || "Your loan application has been rejected."
       );
-
-      // Return response for approval
-      return res.status(200).send({
-        error: false,
-        message:
-          "Loan request approved, appointment scheduled, and email sent with token slip.",
-        data: {
-          loanRequestId: findRequest._id,
-          status: findRequest.status,
-          tokenNumber,
-          appointment: appointmentDetails,
-        },
-      });
     }
 
-    // Handle loan request status update to "Rejected"
-    if (status === "Rejected") {
-      // If it's already rejected, return an error
-      // if (findRequest.status === "Rejected") {
-      //     return res.status(400).send({
-      //         error: true,
-      //         message: "This loan request is already rejected.",
-      //     });
-      // }
-
-      // If rejection reason is missing, return an error
-      if (!rejectedReason) {
-        return res.status(400).send({
-          error: true,
-          message: "Please provide the rejected reason.",
-        });
-      }
-
-      // Update loan status to rejected
-      findRequest.status = "Rejected";
-      await findRequest.save();
-
-      // Send an email to the user with the rejection reason
-      await sendEmail(
-        email,
-        "Loan Request Rejected",
-        `Your loan request has been rejected. Reason: ${rejectedReason}`,
-        []
-      );
-
-      // Return response for rejection
-      return res.status(200).send({
-        error: false,
-        message:
-          "Loan request rejected successfully, email sent with the reason.",
-        data: {
-          loanRequestId: findRequest._id,
-          status: findRequest.status,
-          rejectedReason,
-        },
-      });
-    }
-
-    // If status is not approved or rejected, return an error
-    return res.status(400).send({
-      error: true,
-      message: "Invalid status provided.",
+    res.status(200).json({
+      error: false,
+      message: "Loan status updated successfully.",
+      data: loan,
     });
-  } catch (e) {
-    console.error("Error in updateLoanRequest:", e.message);
-    res.status(500).send({
+  } catch (error) {
+    console.error("Error in updateLoanStatus:", error.message);
+    res.status(500).json({
       error: true,
-      message: e.message,
+      message: error.message,
     });
   }
 }
+
+// export async function updateLoanRequest(req, res) {
+//   try {
+//     const { requestId, email, rejectedReason, appointmentDetails, status } =
+//       req.body;
+
+//     // Find the loan request by its ID
+//     let findRequest = await LoanModal.findById(requestId);
+
+//     if (!findRequest) {
+//       return res.status(404).send({
+//         error: true,
+//         message: "No request found, there is an error.",
+//       });
+//     }
+
+//     // Handle loan request status update to "Approved"
+//     if (status === "Approved") {
+//       // If it's already approved, return an error
+//       // if (findRequest.status === "Approved") {
+//       //     return res.status(400).send({
+//       //         error: true,
+//       //         message: "This loan request is already approved.",
+//       //     });
+//       // }
+
+//       // Update loan status to approved
+//       findRequest.status = "Approved";
+//       await findRequest.save();
+
+//       // Generate a unique token for the user
+//       const tokenNumber = `TOKEN-${findRequest._id.toString()}`; // Generate token from loan request ID
+
+//       // Schedule the appointment
+//       const appointment = new AppointmentModal({
+//         loanId: requestId,
+//         userId: findRequest.userId,
+//         tokenNumber,
+//         date: appointmentDetails.date,
+//         time: appointmentDetails.time,
+//         officeLocation: appointmentDetails.officeLocation,
+//       });
+
+//       await appointment.save();
+
+//       // Generate token slip (JPEG image)
+//       const tokenSlipImage = await generateTokenSlip(
+//         tokenNumber,
+//         appointmentDetails
+//       );
+
+//       // Send an email with the token slip to the user
+//       await sendEmail(
+//         email,
+//         "Loan Request Approved",
+//         "Your loan request has been approved. Please find your token slip attached.",
+//         [
+//           {
+//             filename: `Token_${tokenNumber}.jpeg`,
+//             path: tokenSlipImage,
+//             encoding: "base64",
+//           },
+//         ]
+//       );
+
+//       // Return response for approval
+//       return res.status(200).send({
+//         error: false,
+//         message:
+//           "Loan request approved, appointment scheduled, and email sent with token slip.",
+//         data: {
+//           loanRequestId: findRequest._id,
+//           status: findRequest.status,
+//           tokenNumber,
+//           appointment: appointmentDetails,
+//         },
+//       });
+//     }
+
+//     // Handle loan request status update to "Rejected"
+//     if (status === "Rejected") {
+//       // If it's already rejected, return an error
+//       // if (findRequest.status === "Rejected") {
+//       //     return res.status(400).send({
+//       //         error: true,
+//       //         message: "This loan request is already rejected.",
+//       //     });
+//       // }
+
+//       // If rejection reason is missing, return an error
+//       if (!rejectedReason) {
+//         return res.status(400).send({
+//           error: true,
+//           message: "Please provide the rejected reason.",
+//         });
+//       }
+
+//       // Update loan status to rejected
+//       findRequest.status = "Rejected";
+//       await findRequest.save();
+
+//       // Send an email to the user with the rejection reason
+//       await sendEmail(
+//         email,
+//         "Loan Request Rejected",
+//         `Your loan request has been rejected. Reason: ${rejectedReason}`,
+//         []
+//       );
+
+//       // Return response for rejection
+//       return res.status(200).send({
+//         error: false,
+//         message:
+//           "Loan request rejected successfully, email sent with the reason.",
+//         data: {
+//           loanRequestId: findRequest._id,
+//           status: findRequest.status,
+//           rejectedReason,
+//         },
+//       });
+//     }
+
+//     // If status is not approved or rejected, return an error
+//     return res.status(400).send({
+//       error: true,
+//       message: "Invalid status provided.",
+//     });
+//   } catch (e) {
+//     console.error("Error in updateLoanRequest:", e.message);
+//     res.status(500).send({
+//       error: true,
+//       message: e.message,
+//     });
+//   }
+// }
