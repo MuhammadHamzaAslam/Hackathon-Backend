@@ -160,9 +160,9 @@ export async function LoginNewUser(req, res) {
     let user = await UserModal.findOne({ email: req.body.email });
 
     if (!user) {
-      return res.send({
-        message: "User Not Found",
+      return res.status(400).json({
         error: true,
+        message: "User Not Found!",
       });
     }
 
@@ -171,9 +171,9 @@ export async function LoginNewUser(req, res) {
       user.password
     );
     if (!isPasswordCorrect) {
-      return res.send({
-        message: "Password Not Matched",
+      res.status(400).json({
         error: true,
+        message: "Password Not Matched!",
       });
     }
 
@@ -193,15 +193,17 @@ export async function LoginNewUser(req, res) {
     );
     console.log(generatingToken, "token");
 
-    res.send({
-      message: "Good",
+    res.status(201).json({
+      error: false,
+      message: "User Login Successfully!",
       token: generatingToken,
       user: user,
     });
   } catch (e) {
     console.error(e);
-    res.send({
-      message: "error",
+    res.status(404).json({
+      error: true,
+      message: e.message,
     });
   }
 }
